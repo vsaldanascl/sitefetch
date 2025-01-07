@@ -12,7 +12,7 @@ One-off usage (choose one of the followings):
 ```bash
 bunx sitefetch
 npx sitefetch
-pnpm sitefetch
+pnpx sitefetch
 ```
 
 Install globally (choose one of the followings):
