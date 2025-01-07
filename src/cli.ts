@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import path from "node:path"
 import fs from "node:fs"
 import { cac } from "cac"
 import { fetchSite } from "./fetch"
@@ -52,6 +53,7 @@ cli
       .join("\n\n")
 
     if (flags.outfile) {
+      fs.mkdirSync(path.dirname(flags.outfile), { recursive: true })
       fs.writeFileSync(flags.outfile, text, "utf8")
     } else {
       console.log(text)
