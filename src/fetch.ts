@@ -41,7 +41,12 @@ export async function fetchPage(
 
   fetched.add(pathname)
 
-  const res = await fetch(url)
+  const res = await fetch(url, {
+    headers: {
+      "user-agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    },
+  })
 
   if (!res.ok) {
     logger.warn(`Failed to fetch ${url}: ${res.statusText}`)
