@@ -4,7 +4,7 @@ Fetch an entire site and save it as a text file (to be used with AI models).
 
 ## Install
 
-One-off usage:
+One-off usage (choose one of the followings):
 
 ```bash
 bunx sitefetch
@@ -12,7 +12,7 @@ npx sitefetch
 pnpm sitefetch
 ```
 
-Install globally:
+Install globally (choose one of the followings):
 
 ```bash
 bun i -g sitefetch
