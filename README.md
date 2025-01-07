@@ -32,6 +32,10 @@ sitefetch https://egoist.dev -o site.txt
 sitefetch https://egoist.dev -o site.txt --concurrency 10
 ```
 
+## Plug
+
+If you like this, please check out my LLM chat app: https://chatwise.app
+
 ## License
 
 MIT.
