@@ -1,7 +1,7 @@
 import path from "node:path"
 import fs from "node:fs"
 import { cac } from "cac"
-import { fetchSite } from "./fetch"
+import { fetchSite, serializePages } from "./fetch"
 import { logger } from "./logger"
 import { formatNumber } from "./utils"
 import { version } from "../package.json"
@@ -41,21 +41,15 @@ cli
 
     logger.info(`Total token count: ${formatNumber(totalTokenCount)}`)
 
-    const text = pagesArr
-      .map((page) =>
-        `<page>
-<title>${page.title}</title>
-<url>${page.url}</url>
-<content>${page.content}</content>
-</page>`.trim()
-      )
-      .join("\n\n")
-
     if (flags.outfile) {
+      const output = serializePages(
+        pages,
+        flags.outfile.endsWith(".json") ? "json" : "text"
+      )
       fs.mkdirSync(path.dirname(flags.outfile), { recursive: true })
-      fs.writeFileSync(flags.outfile, text, "utf8")
+      fs.writeFileSync(flags.outfile, output, "utf8")
     } else {
-      console.log(text)
+      console.log(serializePages(pages, "text"))
     }
   })
 

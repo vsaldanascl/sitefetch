@@ -116,3 +116,22 @@ export async function fetchPage(
     tokenCount,
   })
 }
+
+export function serializePages(
+  pages: Map<string, Page>,
+  format: "json" | "text"
+) {
+  if (format === "json") {
+    return JSON.stringify([...pages.values()])
+  }
+
+  return [...pages.values()]
+    .map((page) =>
+      `<page>
+  <title>${page.title}</title>
+  <url>${page.url}</url>
+  <content>${page.content}</content>
+</page>`.trim()
+    )
+    .join("\n\n")
+}
