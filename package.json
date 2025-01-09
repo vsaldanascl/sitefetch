@@ -15,17 +15,16 @@
   "keywords": [],
   "author": "EGOIST <hi@egoist.dev>",
   "license": "MIT",
-  "dependencies": {
+  "devDependencies": {
     "@mozilla/readability": "^0.5.0",
     "cac": "^6.7.14",
+    "cheerio": "^1.0.0",
     "gpt-tokenizer": "^2.8.1",
     "happy-dom": "^16.3.0",
     "p-queue": "^8.0.1",
     "picocolors": "^1.1.1",
     "turndown": "^7.2.0",
-    "turndown-plugin-gfm": "^1.0.2"
-  },
-  "devDependencies": {
+    "turndown-plugin-gfm": "^1.0.2",
     "@types/bun": "^1.1.15",
     "@types/turndown": "^5.0.5"
   }

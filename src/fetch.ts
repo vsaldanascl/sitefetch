@@ -4,6 +4,7 @@ import { Readability } from "@mozilla/readability"
 import { encode } from "gpt-tokenizer/model/gpt-4o"
 import { toMarkdown } from "./to-markdown"
 import { logger } from "./logger"
+import { load } from "cheerio"
 
 type Page = {
   title: string
@@ -67,18 +68,25 @@ export async function fetchPage(
     logger.warn(`Redirected to other site: ${url}`)
     return
   }
+  const extraUrls: string[] = []
 
-  const html = await res.text()
+  const $ = load(await res.text())
+  $("script,style,link").remove()
+
+  const html = $.html()
+
   const window = new Window({
     url,
+    console: console,
   })
 
   window.document.write(html)
 
-  const extraUrls: string[] = []
+  await window.happyDOM.waitUntilComplete()
 
   window.document.querySelectorAll("a").forEach((link) => {
     const href = link.getAttribute("href")
+
     if (!href) {
       return
     }
