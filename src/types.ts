@@ -19,6 +19,11 @@ export type Options = {
    * Limit the result to this amount of pages
    */
   limit?: number
+
+  /**
+   * A custom function to fetch URL
+   */
+  fetch?: (url: string, init: RequestInit) => Promise<Response>
 }
 
 export type Page = {
