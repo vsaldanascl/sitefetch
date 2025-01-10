@@ -12,3 +12,7 @@ export function formatNumber(num: number): string {
 export function matchPath(path: string, pattern: string | string[]): boolean {
   return micromatch.isMatch(path, pattern)
 }
+
+export function ensureArray<T>(input: T | T[]): T[] {
+  return Array.isArray(input) ? input : [input]
+}

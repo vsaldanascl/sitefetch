@@ -1,10 +1,12 @@
-export type Match = string | string[]
-
 export type FetchSiteOptions = {
   /** How many requests can be made at the same time */
   concurrency?: number
-  /** Match pathname by specific patterns, powered by micromatch */
-  match?: Match
+
+  /**
+   * Match pathname by specific patterns, powered by micromatch
+   * Only pages matched by this will be fetched
+   */
+  match?: string[]
 }
 
 export type Page = {

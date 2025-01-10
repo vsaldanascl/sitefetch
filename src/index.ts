@@ -6,7 +6,7 @@ import { toMarkdown } from "./to-markdown.ts"
 import { logger } from "./logger.ts"
 import { load } from "cheerio"
 import { matchPath } from "./utils.ts"
-import type { FetchSiteOptions, FetchSiteResult, Match } from "./types.ts"
+import type { FetchSiteOptions, FetchSiteResult } from "./types.ts"
 
 export async function fetchSite(
   url: string,
@@ -22,7 +22,13 @@ export async function fetchSite(
   const pages: FetchSiteResult = new Map()
   const fetched: Set<string> = new Set()
 
-  await fetchPage(url, { pages, fetched, queue, match: options.match })
+  await fetchPage(url, {
+    pages,
+    fetched,
+    queue,
+    match: options.match,
+    skipMatch: true,
+  })
 
   await queue.onIdle()
 
@@ -35,7 +41,8 @@ async function fetchPage(
     pages: FetchSiteResult
     fetched: Set<string>
     queue: Queue
-    match?: Match
+    match?: string[]
+    skipMatch?: boolean
   }
 ) {
   const { queue, pages, fetched } = options
@@ -47,6 +54,18 @@ async function fetchPage(
   }
 
   fetched.add(pathname)
+
+  // return if not matched
+  // we don't need to extract content for this page
+  if (
+    !options.skipMatch &&
+    options.match &&
+    !matchPath(pathname, options.match)
+  ) {
+    return
+  }
+
+  logger.info(`Fetching ${c.green(url)}`)
 
   const res = await fetch(url, {
     headers: {
@@ -98,17 +117,10 @@ async function fetchPage(
 
   if (extraUrls.length > 0) {
     for (const url of extraUrls) {
-      queue.add(() => fetchPage(url, options))
+      queue.add(() => fetchPage(url, { ...options, skipMatch: false }))
     }
   }
 
-  // return if not matched
-  // we don't need to extract content for this page
-  if (options.match && !matchPath(pathname, options.match)) {
-    return
-  }
-
-  logger.info(`Fetched ${c.green(url)}`)
   const window = new Window({
     url,
     settings: {

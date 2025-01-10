@@ -4,7 +4,7 @@ import { cac } from "cac"
 import { encode } from "gpt-tokenizer/model/gpt-4o"
 import { fetchSite, serializePages } from "./index.ts"
 import { logger } from "./logger.ts"
-import { formatNumber } from "./utils.ts"
+import { ensureArray, formatNumber } from "./utils.ts"
 import { version } from "../package.json"
 
 const cli = cac("sitefetch")
@@ -15,7 +15,7 @@ cli
   .option("--concurrency <number>", "Number of concurrent requests", {
     default: 3,
   })
-  .option("-m, --match <pattern>", "Only fetch matched pathname")
+  .option("-m, --match <pattern>", "Only fetch matched pages")
   .option("--silent", "Do not print any logs")
   .action(async (url, flags) => {
     if (!url) {
@@ -29,7 +29,7 @@ cli
 
     const pages = await fetchSite(url, {
       concurrency: flags.concurrency,
-      match: flags.match,
+      match: flags.match && ensureArray(flags.match),
     })
 
     if (pages.size === 0) {

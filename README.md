@@ -33,8 +33,10 @@ sitefetch https://egoist.dev -o site.txt --concurrency 10
 
 ### Match specific pages
 
+Use the `-m, --match` flag to specify the pages you want to fetch:
+
 ```bash
-sitefetch https://vite.dev -m "/blog/*" -m "/guide/*"
+sitefetch https://vite.dev -m "/blog/**" -m "/guide/**"
 ```
 
 The match pattern is tested against the pathname of target pages, powered by micromatch, you can check out all the supported [matching features](https://github.com/micromatch/micromatch#matching-features).
