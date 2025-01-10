@@ -1,28 +1,19 @@
 import Queue from "p-queue"
 import { Window } from "happy-dom"
 import { Readability } from "@mozilla/readability"
-import { encode } from "gpt-tokenizer/model/gpt-4o"
 import { toMarkdown } from "./to-markdown.ts"
 import { logger } from "./logger.ts"
 import { load } from "cheerio"
 import { matchPath } from "./utils.ts"
-
-type Page = {
-  title: string
-  url: string
-  content: string
-  tokenCount: number
-}
-
-type Match = string | string[]
+import type { FetchSiteOptions, FetchSiteResult, Match } from "./types.ts"
 
 export async function fetchSite(
   url: string,
-  options: { concurrency: number; match?: Match }
-) {
+  options: FetchSiteOptions
+): Promise<FetchSiteResult> {
   const queue = new Queue({ concurrency: options.concurrency })
 
-  const pages: Map<string, Page> = new Map()
+  const pages: FetchSiteResult = new Map()
   const fetched: Set<string> = new Set()
 
   await fetchPage(url, { pages, fetched, queue, match: options.match })
@@ -32,10 +23,10 @@ export async function fetchSite(
   return pages
 }
 
-export async function fetchPage(
+async function fetchPage(
   url: string,
   options: {
-    pages: Map<string, Page>
+    pages: FetchSiteResult
     fetched: Set<string>
     queue: Queue
     match?: Match
@@ -137,20 +128,17 @@ export async function fetchPage(
 
   const content = toMarkdown(article.content)
 
-  const tokenCount = encode(content).length
-
   pages.set(pathname, {
     title: article.title,
     url,
     content,
-    tokenCount,
   })
 }
 
 export function serializePages(
-  pages: Map<string, Page>,
+  pages: FetchSiteResult,
   format: "json" | "text"
-) {
+): string {
   if (format === "json") {
     return JSON.stringify([...pages.values()])
   }

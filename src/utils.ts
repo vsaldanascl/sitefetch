@@ -1,7 +1,7 @@
 import micromatch from "micromatch"
 
 // xK or xM
-export function formatNumber(num: number) {
+export function formatNumber(num: number): string {
   return num > 1000000
     ? `${(num / 1000000).toFixed(1)}M`
     : num > 1000
@@ -9,6 +9,6 @@ export function formatNumber(num: number) {
     : num.toString()
 }
 
-export function matchPath(path: string, pattern: string | string[]) {
+export function matchPath(path: string, pattern: string | string[]): boolean {
   return micromatch.isMatch(path, pattern)
 }

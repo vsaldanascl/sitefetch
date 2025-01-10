@@ -43,6 +43,18 @@ The match pattern is tested against the pathname of target pages, powered by mic
 
 If you like this, please check out my LLM chat app: https://chatwise.app
 
+## API
+
+```ts
+import { fetchSite } from "sitefetch"
+
+await fetchSite("https://egoist.dev", {
+  //...options
+})
+```
+
+Check out options in [types.ts](./src/types.ts).
+
 ## License
 
 MIT.

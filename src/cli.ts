@@ -1,7 +1,8 @@
 import path from "node:path"
 import fs from "node:fs"
 import { cac } from "cac"
-import { fetchSite, serializePages } from "./fetch.ts"
+import { encode } from "gpt-tokenizer/model/gpt-4o"
+import { fetchSite, serializePages } from "./index.ts"
 import { logger } from "./logger.ts"
 import { formatNumber } from "./utils.ts"
 import { version } from "../package.json"
@@ -39,7 +40,7 @@ cli
     const pagesArr = [...pages.values()]
 
     const totalTokenCount = pagesArr.reduce(
-      (acc, page) => acc + page.tokenCount,
+      (acc, page) => acc + encode(page.content).length,
       0
     )
 
