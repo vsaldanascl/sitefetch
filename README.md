@@ -41,6 +41,14 @@ sitefetch https://vite.dev -m "/blog/**" -m "/guide/**"
 
 The match pattern is tested against the pathname of target pages, powered by micromatch, you can check out all the supported [matching features](https://github.com/micromatch/micromatch#matching-features).
 
+### Content selector
+
+We use [mozilla/readability](https://github.com/mozilla/readability) to extract readable content from the web page, but on some pages it might return irrelevant contents, in this case you can specify a CSS selector so we know where to find the readable content:
+
+```sitefetch
+sitefetch https://vite.dev --content-selector ".content"
+```
+
 ## Plug
 
 If you like this, please check out my LLM chat app: https://chatwise.app

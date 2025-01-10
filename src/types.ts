@@ -1,4 +1,4 @@
-export type FetchSiteOptions = {
+export type Options = {
   /** How many requests can be made at the same time */
   concurrency?: number
 
@@ -7,6 +7,18 @@ export type FetchSiteOptions = {
    * Only pages matched by this will be fetched
    */
   match?: string[]
+
+  /**
+   * The CSS selector to find content
+   */
+  contentSelector?:
+    | string
+    | ((ctx: { pathname: string }) => string | void | undefined)
+
+  /**
+   * Limit the result to this amount of pages
+   */
+  limit?: number
 }
 
 export type Page = {

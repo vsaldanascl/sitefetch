@@ -16,6 +16,8 @@ cli
     default: 3,
   })
   .option("-m, --match <pattern>", "Only fetch matched pages")
+  .option("--content-selector <selector>", "The CSS selector to find content")
+  .option("--limit <limit>", "Limit the result to this amount of pages")
   .option("--silent", "Do not print any logs")
   .action(async (url, flags) => {
     if (!url) {
@@ -30,6 +32,8 @@ cli
     const pages = await fetchSite(url, {
       concurrency: flags.concurrency,
       match: flags.match && ensureArray(flags.match),
+      contentSelector: flags.contentSelector,
+      limit: flags.limit,
     })
 
     if (pages.size === 0) {
