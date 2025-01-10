@@ -1,6 +1,7 @@
 import Queue from "p-queue"
 import { Window } from "happy-dom"
 import { Readability } from "@mozilla/readability"
+import c from "picocolors"
 import { toMarkdown } from "./to-markdown.ts"
 import { logger } from "./logger.ts"
 import { load } from "cheerio"
@@ -11,7 +12,12 @@ export async function fetchSite(
   url: string,
   options: FetchSiteOptions
 ): Promise<FetchSiteResult> {
-  const queue = new Queue({ concurrency: options.concurrency })
+  const concurrency = options.concurrency || 3
+  const queue = new Queue({ concurrency })
+
+  logger.info(
+    `Started fetching ${c.green(url)} with a concurrency of ${concurrency}`
+  )
 
   const pages: FetchSiteResult = new Map()
   const fetched: Set<string> = new Set()
@@ -39,8 +45,6 @@ async function fetchPage(
   if (fetched.has(pathname)) {
     return
   }
-
-  logger.info(`Fetching ${url}`)
 
   fetched.add(pathname)
 
@@ -101,10 +105,10 @@ async function fetchPage(
   // return if not matched
   // we don't need to extract content for this page
   if (options.match && !matchPath(pathname, options.match)) {
-    logger.warn(`Skipped ${pathname} due to not matched`)
     return
   }
 
+  logger.info(`Fetched ${c.green(url)}`)
   const window = new Window({
     url,
     settings: {

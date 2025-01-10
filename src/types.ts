@@ -2,7 +2,7 @@ export type Match = string | string[]
 
 export type FetchSiteOptions = {
   /** How many requests can be made at the same time */
-  concurrency: number
+  concurrency?: number
   /** Match pathname by specific patterns, powered by micromatch */
   match?: Match
 }

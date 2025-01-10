@@ -23,7 +23,9 @@ export default defineConfig({
     .map((name) => [name, new RegExp(`^${name}/`)])
     .flat(),
   plugins: [
-    UnpluginIsolatedDecl({ transformer: "typescript" }),
+    process.env.NO_DTS
+      ? undefined
+      : UnpluginIsolatedDecl({ transformer: "typescript" }),
     {
       // make sure every node builtin module is prefixed with node:
       name: "add-node-prefix",
