@@ -1,9 +1,9 @@
 import path from "node:path"
 import fs from "node:fs"
 import { cac } from "cac"
-import { fetchSite, serializePages } from "./fetch"
-import { logger } from "./logger"
-import { formatNumber } from "./utils"
+import { fetchSite, serializePages } from "./fetch.ts"
+import { logger } from "./logger.ts"
+import { formatNumber } from "./utils.ts"
 import { version } from "../package.json"
 
 const cli = cac()
@@ -14,6 +14,7 @@ cli
   .option("--concurrency <number>", "Number of concurrent requests", {
     default: 3,
   })
+  .option("-m, --match <pattern>", "Only fetch matched pathname")
   .option("--silent", "Do not print any logs")
   .action(async (url, flags) => {
     if (!url) {
@@ -25,7 +26,10 @@ cli
       logger.setLevel("silent")
     }
 
-    const pages = await fetchSite(url, { concurrency: flags.concurrency })
+    const pages = await fetchSite(url, {
+      concurrency: flags.concurrency,
+      match: flags.match,
+    })
 
     if (pages.size === 0) {
       logger.warn("No pages found")
@@ -39,7 +43,11 @@ cli
       0
     )
 
-    logger.info(`Total token count: ${formatNumber(totalTokenCount)}`)
+    logger.info(
+      `Total token count for ${pages.size} pages: ${formatNumber(
+        totalTokenCount
+      )}`
+    )
 
     if (flags.outfile) {
       const output = serializePages(

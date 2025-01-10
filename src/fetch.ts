@@ -2,9 +2,10 @@ import Queue from "p-queue"
 import { Window } from "happy-dom"
 import { Readability } from "@mozilla/readability"
 import { encode } from "gpt-tokenizer/model/gpt-4o"
-import { toMarkdown } from "./to-markdown"
-import { logger } from "./logger"
+import { toMarkdown } from "./to-markdown.ts"
+import { logger } from "./logger.ts"
 import { load } from "cheerio"
+import { matchPath } from "./utils.ts"
 
 type Page = {
   title: string
@@ -13,13 +14,18 @@ type Page = {
   tokenCount: number
 }
 
-export async function fetchSite(url: string, options: { concurrency: number }) {
+type Match = string | string[]
+
+export async function fetchSite(
+  url: string,
+  options: { concurrency: number; match?: Match }
+) {
   const queue = new Queue({ concurrency: options.concurrency })
 
   const pages: Map<string, Page> = new Map()
   const fetched: Set<string> = new Set()
 
-  await fetchPage(url, { pages, fetched, queue })
+  await fetchPage(url, { pages, fetched, queue, match: options.match })
 
   await queue.onIdle()
 
@@ -28,7 +34,12 @@ export async function fetchSite(url: string, options: { concurrency: number }) {
 
 export async function fetchPage(
   url: string,
-  options: { pages: Map<string, Page>; fetched: Set<string>; queue: Queue }
+  options: {
+    pages: Map<string, Page>
+    fetched: Set<string>
+    queue: Queue
+    match?: Match
+  }
 ) {
   const { queue, pages, fetched } = options
 
@@ -65,27 +76,18 @@ export async function fetchPage(
 
   // redirected to other site, ignore
   if (resUrl.host !== host) {
-    logger.warn(`Redirected to other site: ${url}`)
+    logger.warn(`Redirected from ${host} to ${new URL(resUrl).host}`)
     return
   }
   const extraUrls: string[] = []
 
   const $ = load(await res.text())
-  $("script,style,link").remove()
+  $("script,style,link,img,video").remove()
 
   const html = $.html()
 
-  const window = new Window({
-    url,
-    console: console,
-  })
-
-  window.document.write(html)
-
-  await window.happyDOM.waitUntilComplete()
-
-  window.document.querySelectorAll("a").forEach((link) => {
-    const href = link.getAttribute("href")
+  $("a").each((_, el) => {
+    const href = $(el).attr("href")
 
     if (!href) {
       return
@@ -99,15 +101,35 @@ export async function fetchPage(
     extraUrls.push(thisUrl.href)
   })
 
-  const article = new Readability(window.document as any).parse()
-
-  await window.happyDOM.close()
-
   if (extraUrls.length > 0) {
     for (const url of extraUrls) {
       queue.add(() => fetchPage(url, options))
     }
   }
+
+  // return if not matched
+  // we don't need to extract content for this page
+  if (options.match && !matchPath(pathname, options.match)) {
+    logger.warn(`Skipped ${pathname} due to not matched`)
+    return
+  }
+
+  const window = new Window({
+    url,
+    settings: {
+      disableJavaScriptFileLoading: true,
+      disableJavaScriptEvaluation: true,
+      disableCSSFileLoading: true,
+    },
+  })
+
+  window.document.write(html)
+
+  await window.happyDOM.waitUntilComplete()
+
+  const article = new Readability(window.document as any).parse()
+
+  await window.happyDOM.close()
 
   if (!article) {
     return
