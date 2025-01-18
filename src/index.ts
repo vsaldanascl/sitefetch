@@ -82,8 +82,7 @@ class Fetcher {
 
     const res = await (this.options.fetch || fetch)(url, {
       headers: {
-        "user-agent":
-          "Sitefetch (https://github.com/egoist/sitefetch)",
+        "user-agent": "Sitefetch (https://github.com/egoist/sitefetch)",
       },
     })
 
@@ -122,12 +121,16 @@ class Fetcher {
         return
       }
 
-      const thisUrl = new URL(href, url)
-      if (thisUrl.host !== host) {
-        return
-      }
+      try {
+        const thisUrl = new URL(href, url)
+        if (thisUrl.host !== host) {
+          return
+        }
 
-      extraUrls.push(thisUrl.href)
+        extraUrls.push(thisUrl.href)
+      } catch {
+        logger.warn(`Failed to parse URL: ${href}`)
+      }
     })
 
     if (extraUrls.length > 0) {
