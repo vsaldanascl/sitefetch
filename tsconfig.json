@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
       // Enable latest features
-      "lib": ["ESNext"],
+      "lib": ["ESNext", "DOM", "DOM.Iterable"],
       "target": "ESNext",
       "module": "ESNext",
       "moduleDetection": "force",
@@ -23,6 +23,12 @@
       // Some stricter flags
       "noUnusedLocals": true,
       "noUnusedParameters": true,
-      "noPropertyAccessFromIndexSignature": true
+      "noPropertyAccessFromIndexSignature": true,
+      
+      // Allow implicit any for now to handle cheerio types
+      "noImplicitAny": false,
+      
+      // Types
+      "types": ["node"]
     }
   }

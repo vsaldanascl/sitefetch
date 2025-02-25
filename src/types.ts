@@ -1,4 +1,10 @@
 export type Options = {
+  /** Enable streaming mode to process pages one at a time */
+  onPage?: (page: { title: string; url: string; content: string }) => void
+
+  /** Maximum memory usage in MB before warning */
+  maxMemoryMB?: number
+
   /** How many requests can be made at the same time */
   concurrency?: number
 

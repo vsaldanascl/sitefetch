@@ -10,21 +10,56 @@ import type { Options, FetchSiteResult } from "./types.ts"
 
 export async function fetchSite(
   url: string,
-  options: Options
+  options: Options & {
+    onPage?: (page: { title: string; url: string; content: string }) => void;
+    maxMemoryMB?: number;
+  }
 ): Promise<FetchSiteResult> {
   const fetcher = new Fetcher(options)
+  
+  // Monitor memory usage
+  let memoryMonitor: NodeJS.Timer | undefined
+  if (options.maxMemoryMB) {
+    memoryMonitor = setInterval(() => {
+      const memoryUsage = process.memoryUsage();
+      const usedMemoryMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
+      if (usedMemoryMB > options.maxMemoryMB!) {
+        logger.warn(`Memory limit reached (${usedMemoryMB}MB/${options.maxMemoryMB}MB). Consider:
+1. Reducing concurrency (--concurrency)
+2. Using streaming mode (-s, --stream)
+3. Increasing memory limit (--max-memory)`)
+      }
+    }, 1000);
+  }
 
-  return fetcher.fetchSite(url)
+  try {
+    return await fetcher.fetchSite(url)
+  } finally {
+    if (memoryMonitor) {
+      clearInterval(memoryMonitor)
+    }
+  }
 }
 
 class Fetcher {
   #pages: FetchSiteResult = new Map()
   #fetched: Set<string> = new Set()
   #queue: Queue
+  #streamMode: boolean
 
-  constructor(public options: Options) {
+  constructor(public options: Options & { onPage?: (page: { title: string; url: string; content: string }) => void }) {
     const concurrency = options.concurrency || 3
     this.#queue = new Queue({ concurrency })
+    this.#streamMode = Boolean(options.onPage)
+    
+    // Clear memory periodically in stream mode
+    if (this.#streamMode) {
+      setInterval(() => {
+        if (global.gc) {
+          global.gc()
+        }
+      }, 5000)
+    }
   }
 
   #limitReached() {
@@ -175,11 +210,21 @@ class Fetcher {
 
     const content = toMarkdown(article.content)
 
-    this.#pages.set(pathname, {
+    const page = {
       title: article.title || pageTitle,
       url,
       content,
-    })
+    }
+
+    if (this.#streamMode) {
+      this.options.onPage?.(page)
+    } else {
+      this.#pages.set(pathname, page)
+    }
+
+    // Clear some objects to help GC
+    window.document.body.innerHTML = ''
+    $('*').removeAttr('class').removeAttr('id')
   }
 }
 
